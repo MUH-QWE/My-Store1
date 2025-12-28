@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - System Terminal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/AdminPanel.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .terminal-log {
+            background: #000;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            height: 500px;
+            overflow-y: auto;
+            margin-top: 2rem;
+            color: #2A9D8F;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .log-entry {
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .log-time {
+            color: var(--primary);
+            font-weight: 700;
+            opacity: 0.6;
+        }
+
+        .log-msg {
+            line-height: 1.4;
+        }
+
+        .green {
+            color: #2A9D8F;
+        }
+
+        .red {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+
+        <header class="admin-top-bar">
+            <div class="sidebar-logo">
+                <i class="fas fa-terminal"></i>
+                <span>NEXUS</span>
+            </div>
+
+            <button class="mobile-nav-toggle" id="admin-mobile-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav class="admin-nav">
+                <a href="index.html" class="nav-item"><i class="fas fa-globe"></i><span>Live Site</span></a>
+                <a href="AdminDashboard.html" class="nav-item"><i
+                        class="fas fa-tachometer-alt"></i><span>Management</span></a>
+                <a href="AdminStaff.html" class="nav-item"><i class="fas fa-users-cog"></i><span>Staff
+                        Control</span></a>
+                <a href="AdminComms.html" class="nav-item">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>Comms</span>
+                    <span class="nav-badge">0</span>
+                </a>
+                <a href="#" class="nav-item active"><i class="fas fa-terminal"></i><span>System Terminal</span></a>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar"><i class="fas fa-crown"></i></div>
+                <div class="user-info">
+                    <h4 id="admin-name" style="margin: 0; font-size: 0.8rem;">Master Admin</h4>
+                </div>
+                <button class="logout-btn" onclick="store.logout()" style="margin-left: 1rem; padding: 0.4rem 0.8rem;">
+                    <i class="fas fa-power-off"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="welcome-msg">
+                    <h1>System <span class="text-gradient">Terminal</span></h1>
+                    <p>Direct Core Access Enabled</p>
+                </div>
+
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="clearLogs()"
+                        style="padding: 0.8rem 1.5rem; font-size: 0.9rem;">
+                        <i class="fas fa-broom"></i> PURGE LOGS
+                    </button>
+                </div>
+            </header>
+
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3>Synchronized Stream Data</h3>
+                    <div style="display: flex; gap: 1rem;">
+                        <span class="status-badge"
+                            style="background: rgba(231,111,81,0.1); color: var(--primary);">SYNC: ACTIVE</span>
+                        <span class="status-badge">NODE: DJERBA-01</span>
+                    </div>
+                </div>
+
+                <div class="terminal-log" id="terminal-output">
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ALL.js"></script>
+    <script>
+        const output = document.getElementById('terminal-output');
+
+        function addLog(msg, type = 'green') {
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="log-msg ${type}">>> ${msg}</span>
+            `;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearLogs() {
+            output.innerHTML = '';
+            addLog('System log buffer purged.', 'red');
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('Initializing Tactical Link...', 'green');
+            setTimeout(() => addLog('Djerba Digital Node connected.', 'green'), 800);
+            setTimeout(() => addLog('Synchronizing Inventory Database...', 'green'), 1500);
+            setTimeout(() => addLog(`${getProducts().length} assets confirmed and mapped.`, 'green'), 2200);
+
+            setInterval(() => {
+                const activities = [
+                    'Scanning for new transmissions...',
+                    'Heartbeat detected on Node-Alpha.',
+                    'Optimizing memory allocation...',
+                    'Database cluster sync complete.',
+                    'Firewall check: No breaches detected.'
+                ];
+                const msg = activities[Math.floor(Math.random() * activities.length)];
+                addLog(msg, Math.random() > 0.1 ? 'green' : 'primary');
+            }, 5000);
+
+            document.getElementById('admin-mobile-toggle').addEventListener('click', () => {
+                document.querySelector('.admin-nav').classList.toggle('active');
+            });
+
+            document.querySelectorAll('.admin-nav .nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelector('.admin-nav').classList.remove('active');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
