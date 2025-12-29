@@ -52,7 +52,7 @@
         <section class="container">
             <div id="product-detail"
                 style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;">
-                
+
             </div>
         </section>
     </main>
@@ -69,7 +69,7 @@
             const desc = document.getElementById('product-description');
             if (desc) {
                 desc.style.fontSize = size;
-                
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const productId = urlParams.get('id') || 1;
                 localStorage.setItem(`product_desc_font_${productId}`, size);
@@ -173,14 +173,17 @@
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
                             ${store.getUser() ? `
                                 <button class="btn" style="flex: 2; min-width: 200px; padding: 1.2rem; font-size: 1rem;" onclick="addToArsenal()">Add to Arsenal</button>
                             ` : `
                                 <a href="LogIn.html" class="btn" style="flex: 2; min-width: 200px; padding: 1.2rem; text-decoration: none; text-align: center; font-size: 1rem;">Login to Purchase</a>
                             `}
-                            
-                            <div style="display: flex; gap: 1rem; flex: 1; min-width: 120px;">
+                            <a href="App.html" class="btn btn-secondary" style="flex: 2; min-width: 200px; padding: 1.2rem; text-decoration: none; text-align: center; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <i class="fas fa-eye"></i> VIRTUAL VISUALIZATION
+                            </a>
+                        </div>
+                        <div style="display: flex; gap: 1rem; flex: 1; min-width: 120px;">
                                 <button class="btn btn-secondary" style="flex: 1; padding: 1.2rem; color: ${store.isInWishlist(currentProduct.id) ? 'var(--secondary)' : 'var(--text-primary)'};" onclick="toggleWish(${currentProduct.id}, this)">
                                     ${store.isInWishlist(currentProduct.id) ? '❤️' : '★'}
                                 </button>
@@ -195,7 +198,7 @@
                     </div>
                 `;
 
-                
+
                 const imgContainer = document.querySelector('.image-container');
                 const img = imgContainer.querySelector('img');
                 imgContainer.addEventListener('mousemove', (e) => {
@@ -208,7 +211,7 @@
                     img.style.transform = `scale(1) rotateY(0) rotateX(0)`;
                 });
 
-                
+
                 const savedSize = localStorage.getItem(`product_desc_font_${productId}`);
                 if (savedSize) {
                     const desc = document.getElementById('product-description');

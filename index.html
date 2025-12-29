@@ -14,9 +14,20 @@
         <section style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
             <div
                 style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                <img src="https://images.pexels.com/photos/10363229/pexels-photo-10363229.jpeg?auto=compress&cs=tinysrgb&w=2560"
+                <img id="hero-img-display"
+                    src="https://images.pexels.com/photos/10363229/pexels-photo-10363229.jpeg?auto=compress&cs=tinysrgb&w=2560"
                     alt="Dark Futuristic Fashion Hero"
                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6) contrast(1.1);">
+
+                <div id="admin-hero-controls"
+                    style="position: absolute; top: 120px; right: 2rem; z-index: 100; display: none;">
+                    <label for="hero-upload" class="btn"
+                        style="padding: 0.8rem 1.5rem; font-size: 0.7rem; background: rgba(212, 175, 55, 0.2); border-color: var(--primary);">
+                        <i class="fas fa-camera"></i> EDIT HERO
+                    </label>
+                    <input type="file" id="hero-upload" accept="image/*" style="display: none;"
+                        onchange="updateHeroImage(this)">
+                </div>
 
                 <div class="fade-in stagger-1"
                     style="z-index: 2; text-align: center; padding: 2rem; max-width: 900px; margin-top: 4rem;">
@@ -32,8 +43,11 @@
 
                     <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 5rem;">
                         <a href="Products.html" class="btn"
-                            style="background: white; color: black; border: none; padding: 1.2rem 3.5rem; font-size: 0.9rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.1em; transition: 0.3s;">EXPLORE
+                            style="background: transparent; color: white; border: 1px solid var(--primary); padding: 1.2rem 3.5rem; font-size: 0.9rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.1em; transition: 0.3s; backdrop-filter: blur(10px);">EXPLORE
                             COLLECTION</a>
+                        <a href="App.html" class="btn"
+                            style="background: var(--primary); color: black; border: none; padding: 1.2rem 3.5rem; font-size: 0.9rem; font-weight: 900; border-radius: 4px; letter-spacing: 0.1em; transition: 0.3s; box-shadow: 0 10px 40px rgba(212, 175, 55, 0.4); text-shadow: none;">VIRTUAL
+                            VISUALIZATION</a>
                     </div>
                 </div>
             </div>
@@ -69,6 +83,18 @@
         document.addEventListener('DOMContentLoaded', async () => {
             Layout.render();
 
+            // Admin Level 2+ Check
+            const user = store.getUser();
+            if (user && user.role === 'admin' && user.level >= 2) {
+                document.getElementById('admin-hero-controls').style.display = 'block';
+            }
+
+            // Load Saved Hero
+            const savedHero = localStorage.getItem('nexus_home_hero');
+            if (savedHero) {
+                document.getElementById('hero-img-display').src = savedHero;
+            }
+
             const products = await api.get('/products/get.php');
             const grid = document.getElementById('featured-products');
 
@@ -92,6 +118,20 @@
                 `).join('');
             }
         });
+
+        function updateHeroImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const b64 = e.target.result;
+                    document.getElementById('hero-img-display').src = b64;
+                    localStorage.setItem('nexus_home_hero', b64);
+                    showNotification('HERO MODULE UPDATED', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
     </script>
 </body>
 

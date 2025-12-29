@@ -75,7 +75,12 @@ window.api = {
                 const isAdmin = data.email === 'admin@store.com';
                 return {
                     token: 'demo-session-token',
-                    user: { id: isAdmin ? 99 : 1, name: isAdmin ? 'Grand Admin' : 'Demo User', role: isAdmin ? 'admin' : 'user' }
+                    user: { 
+                        id: isAdmin ? 99 : 1, 
+                        name: isAdmin ? 'Grand Admin' : 'Demo User', 
+                        role: isAdmin ? 'admin' : 'user',
+                        level: isAdmin ? 2 : 1
+                    }
                 };
             }
             if (endpoint.includes('/products/update.php')) {

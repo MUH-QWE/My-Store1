@@ -4,43 +4,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tayeb Djerba - Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>VIRTUAL VIZ | TAYEB DJERBA</title>
+    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --viz-primary: #D4AF37;
+            --viz-bg: #020202;
+            --viz-card: rgba(15, 15, 15, 0.7);
+        }
+
+        body {
+            background: var(--viz-bg);
+            color: #fff;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+
+        /* Modern Grid Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 50px 50px;
+            }
+        }
+
+        .viz-container {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            height: calc(100vh - 100px);
+            margin-top: 100px;
+            gap: 3rem;
+            padding: 0 3rem 3rem;
+            max-width: 1800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sidebar-viz {
+            background: var(--viz-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 2.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .main-viewer {
+            position: relative;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            border-radius: 40px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hologram-ring {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border: 2px dashed rgba(212, 175, 55, 0.2);
+            border-radius: 50%;
+            animation: rotateRing 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateRing {
+            from {
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.1);
+            }
+
+            to {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--viz-primary), transparent);
+            box-shadow: 0 0 30px var(--viz-primary);
+            animation: scanMove 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            z-index: 5;
+            opacity: 0.8;
+        }
+
+        @keyframes scanMove {
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        .viz-product-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .viz-product-card:hover,
+        .viz-product-card.active {
+            border-color: var(--viz-primary);
+            background: rgba(212, 175, 55, 0.1);
+            transform: scale(1.02) translateX(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .viz-product-card img {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hologram-display {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.3));
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+        }
+
+        .viz-overlay-data {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 280px;
+            z-index: 10;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.4rem 1rem;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--viz-primary);
+            font-size: 0.7rem;
+            font-weight: 800;
+            border-radius: 50px;
+            border: 1px solid var(--viz-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--viz-primary);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .btn-deploy {
+            background: var(--viz-primary);
+            color: #000;
+            border: none;
+            padding: 1.2rem 2rem;
+            font-size: 0.8rem;
+            font-weight: 900;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-deploy:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--viz-primary);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 1200px) {
+            .viz-container {
+                grid-template-columns: 320px 1fr;
+                gap: 2rem;
+                padding: 0 2rem 2rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .viz-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                margin-top: 80px;
+                padding: 1.5rem;
+                gap: 2rem;
+            }
+
+            .sidebar-viz {
+                height: 350px;
+                padding: 1.5rem;
+            }
+
+            .main-viewer {
+                height: 500px;
+                border-radius: 30px;
+            }
+
+            .viz-overlay-data {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-top: 1.5rem;
+                width: 100%;
+                min-width: unset;
+                box-sizing: border-box;
+            }
+
+            .hologram-ring {
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .viz-container {
+                padding: 1rem;
+            }
+
+            .main-viewer {
+                height: 400px;
+            }
+
+            .hologram-ring {
+                width: 300px;
+                height: 300px;
+            }
+
+            .viz-product-card {
+                padding: 0.8rem;
+            }
+
+            .viz-product-card img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <main class="container" style="padding-top: 2rem;">
+    <div class="bg-grid"></div>
+    <header id="main-header"></header>
 
-        <h1>Dashboard</h1>
-        <p>Welcome to the main application hub.</p>
+    <main class="viz-container">
+        <aside class="sidebar-viz">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2
+                    style="font-size: 0.9rem; font-weight: 900; letter-spacing: 3px; color: var(--viz-primary); margin: 0;">
+                    CORE ASSETS</h2>
+                <i class="fas fa-microchip" style="color: var(--viz-primary); opacity: 0.5;"></i>
+            </div>
+            <div id="viz-product-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Products will be loaded here -->
+            </div>
+        </aside>
 
-        <div class="grid">
-            <a href="Products.php" class="card" style="text-align: center;">
-                <h3>Shop</h3>
-            </a>
-            <a href="Cart.php" class="card" style="text-align: center;">
-                <h3>Cart</h3>
-            </a>
-            <a href="Orders.php" class="card" style="text-align: center;">
-                <h3>My Orders</h3>
-            </a>
-            <a href="Wishlist.php" class="card" style="text-align: center;">
-                <h3>Wishlist</h3>
-            </a>
-        </div>
+        <section class="main-viewer">
+            <img src="https://images.pexels.com/photos/10363229/pexels-photo-10363229.jpeg?auto=compress&cs=tinysrgb&w=2560"
+                id="viewer-bg"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(1);">
+            <div id="admin-viz-controls"
+                style="position: absolute; top: 2rem; right: 2rem; z-index: 100; display: none;">
+                <label for="bg-upload" class="btn-deploy"
+                    style="padding: 0.8rem 1.5rem; font-size: 0.7rem; width: auto; margin: 0;">
+                    <i class="fas fa-camera"></i> EDIT BG
+                </label>
+                <input type="file" id="bg-upload" accept="image/*" style="display: none;" onchange="updateVizBg(this)">
+            </div>
 
-        <script>
-            if (!store.getToken()) window.location.href = 'LogIn.html';
-        </script>
+            <div class="hologram-ring"></div>
+            <div class="scanner-line"></div>
+            <img src="" alt="Virtual Model" class="hologram-display" id="main-viz-image">
 
+            <div class="viz-overlay-data" id="viz-data" style="display: none;">
+                <div class="status-badge" id="scan-status">SCANNING DATA</div>
+                <h3 id="viz-title" style="margin: 1.5rem 0 0.5rem; font-size: 1.8rem; font-weight: 900;">---</h3>
+                <p id="viz-desc"
+                    style="font-size: 0.85rem; color: #aaa; line-height: 1.8; font-weight: 300; margin-bottom: 2rem;">
+                    Initializing neural link...</p>
+
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span
+                            style="color: #666; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Valuation</span>
+                        <span id="viz-price" style="font-weight: 900; color: #fff; font-size: 1.4rem;">0.00 EGP</span>
+                    </div>
+                    <button class="btn-deploy" onclick="addToCartFromViz()">
+                        <i class="fas fa-shopping-cart"></i> ADD TO ARSENAL
+                    </button>
+                </div>
+            </div>
+        </section>
     </main>
+
     <script src="js/ALL.js"></script>
+    <script src="js/cartManager.js"></script>
     <script src="js/layout.js"></script>
     <script src="js/header.js"></script>
+
+    <script>
+        let currentVizProduct = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            Layout.render();
+
+            // Admin Level 2+ Check
+            const user = store.getUser();
+            if (user && user.role === 'admin' && user.level >= 2) {
+                document.getElementById('admin-viz-controls').style.display = 'block';
+            }
+
+            // Load Saved BG
+            const savedBg = localStorage.getItem('nexus_viz_bg');
+            if (savedBg) {
+                document.getElementById('viewer-bg').src = savedBg;
+            }
+
+            const products = await api.get('/products/get.php');
+            const list = document.getElementById('viz-product-list');
+
+            if (products && products.length > 0) {
+                list.innerHTML = products.map((p, index) => `
+                    <div class="viz-product-card ${index === 0 ? 'active' : ''}" onclick="loadViz(${JSON.stringify(p).replace(/"/g, '&quot;')}, this)">
+                        <img src="${p.image}" alt="${p.name}">
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 0.85rem; margin: 0; font-weight: 700;">${p.name}</h4>
+                            <span style="font-size: 0.75rem; color: var(--viz-primary); font-weight: 800;">${p.price.toFixed(2)} EGP</span>
+                        </div>
+                        <i class="fas fa-chevron-right" style="font-size: 0.7rem; opacity: 0.3;"></i>
+                    </div>
+                `).join('');
+
+                loadViz(products[0], list.children[0]);
+            }
+        });
+
+        function loadViz(p, el) {
+            document.querySelectorAll('.viz-product-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            currentVizProduct = p;
+
+            const img = document.getElementById('main-viz-image');
+            const title = document.getElementById('viz-title');
+            const desc = document.getElementById('viz-desc');
+            const price = document.getElementById('viz-price');
+            const dataPanel = document.getElementById('viz-data');
+
+            dataPanel.style.display = 'block';
+            img.style.opacity = '0';
+            img.style.transform = 'scale(0.8) translateY(20px)';
+
+            setTimeout(() => {
+                img.src = p.image;
+                title.textContent = p.name.toUpperCase();
+                desc.textContent = p.description;
+                price.textContent = `${p.price.toFixed(2)} EGP`;
+
+                img.style.opacity = '1';
+                img.style.transform = 'scale(1) translateY(0)';
+                showNotification(`NEURAL LINK ESTABLISHED: ${p.name}`, 'info');
+            }, 400);
+        }
+
+        async function addToCartFromViz() {
+            if (!currentVizProduct) return;
+            const success = await cartManager.add(currentVizProduct);
+            if (success) {
+                showNotification(`ASSET ${currentVizProduct.name} DEPLOYED TO ARSENAL`, 'success');
+            }
+        }
+
+        function updateVizBg(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const b64 = e.target.result;
+                    document.getElementById('viewer-bg').src = b64;
+                    localStorage.setItem('nexus_viz_bg', b64);
+                    showNotification('VIEWER CONTEXT MODULATED', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </body>
 
 </html>
-
-
-
