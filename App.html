@@ -77,13 +77,16 @@
 
         .main-viewer {
             position: relative;
-            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 40px;
-            border: 1px solid rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
         }
 
         .hologram-ring {
@@ -172,8 +175,8 @@
         }
 
         .hologram-display {
-            width: 80%;
-            height: 80%;
+            width: 70%;
+            height: 70%;
             object-fit: contain;
             filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.3));
             transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -352,32 +355,47 @@
         <section class="main-viewer">
             <img src="https://images.pexels.com/photos/10363229/pexels-photo-10363229.jpeg?auto=compress&cs=tinysrgb&w=2560"
                 id="viewer-bg"
-                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: grayscale(1);">
+                style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.15; filter: brightness(0.4) contrast(1.2); z-index: -1;">
+
             <div id="admin-viz-controls"
                 style="position: absolute; top: 2rem; right: 2rem; z-index: 100; display: none;">
                 <label for="bg-upload" class="btn-deploy"
-                    style="padding: 0.8rem 1.5rem; font-size: 0.7rem; width: auto; margin: 0;">
+                    style="padding: 0.8rem 1.5rem; font-size: 0.7rem; width: auto; margin: 0; background: rgba(212, 175, 55, 0.8); color: #000;">
                     <i class="fas fa-camera"></i> EDIT BG
                 </label>
                 <input type="file" id="bg-upload" accept="image/*" style="display: none;" onchange="updateVizBg(this)">
             </div>
 
+            <!-- Enhanced HUD elements -->
+            <div
+                style="position: absolute; top: 2rem; left: 2rem; display: flex; flex-direction: column; gap: 0.5rem; opacity: 0.6;">
+                <div style="width: 40px; height: 2px; background: var(--viz-primary);"></div>
+                <div style="font-size: 0.6rem; letter-spacing: 0.3em; font-weight: 900;">SYSTEM ACTIVE</div>
+            </div>
+
             <div class="hologram-ring"></div>
             <div class="scanner-line"></div>
-            <img src="" alt="Virtual Model" class="hologram-display" id="main-viz-image">
+
+            <div id="hologram-loader"
+                style="position: absolute; font-size: 0.7rem; letter-spacing: 0.5em; opacity: 0.5; animation: pulse 1.5s infinite;">
+                ESTABLISHING LINK...</div>
+
+            <img src="" class="hologram-display" id="main-viz-image" style="display: none; opacity: 0;">
 
             <div class="viz-overlay-data" id="viz-data" style="display: none;">
                 <div class="status-badge" id="scan-status">SCANNING DATA</div>
-                <h3 id="viz-title" style="margin: 1.5rem 0 0.5rem; font-size: 1.8rem; font-weight: 900;">---</h3>
+                <h3 id="viz-title"
+                    style="margin: 1.5rem 0 0.5rem; font-size: 1.8rem; font-weight: 900; letter-spacing: 0.1em;">---
+                </h3>
                 <p id="viz-desc"
-                    style="font-size: 0.85rem; color: #aaa; line-height: 1.8; font-weight: 300; margin-bottom: 2rem;">
+                    style="font-size: 0.85rem; color: #ccc; line-height: 1.8; font-weight: 300; margin-bottom: 2rem;">
                     Initializing neural link...</p>
 
                 <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem;">
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <span
-                            style="color: #666; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Valuation</span>
+                            style="color: #888; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Valuation</span>
                         <span id="viz-price" style="font-weight: 900; color: #fff; font-size: 1.4rem;">0.00 EGP</span>
                     </div>
                     <button class="btn-deploy" onclick="addToCartFromViz()">
@@ -441,10 +459,12 @@
             const desc = document.getElementById('viz-desc');
             const price = document.getElementById('viz-price');
             const dataPanel = document.getElementById('viz-data');
+            const loader = document.getElementById('hologram-loader');
 
             dataPanel.style.display = 'block';
             img.style.opacity = '0';
             img.style.transform = 'scale(0.8) translateY(20px)';
+            if (loader) loader.style.display = 'block';
 
             setTimeout(() => {
                 img.src = p.image;
@@ -452,10 +472,21 @@
                 desc.textContent = p.description;
                 price.textContent = `${p.price.toFixed(2)} EGP`;
 
-                img.style.opacity = '1';
-                img.style.transform = 'scale(1) translateY(0)';
-                showNotification(`NEURAL LINK ESTABLISHED: ${p.name}`, 'info');
-            }, 400);
+                img.onload = () => {
+                    img.style.display = 'block';
+                    setTimeout(() => {
+                        img.style.opacity = '1';
+                        img.style.transform = 'scale(1) translateY(0)';
+                    }, 50);
+                    if (loader) loader.style.display = 'none';
+                    showNotification(`NEURAL LINK ESTABLISHED: ${p.name}`, 'info');
+                };
+
+                img.onerror = () => {
+                    if (loader) loader.textContent = "LINK FAILURE: ASSET NOT FOUND";
+                    img.style.display = 'none';
+                };
+            }, 600);
         }
 
         async function addToCartFromViz() {
